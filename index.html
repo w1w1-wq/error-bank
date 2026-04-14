@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Банк ошибок — найди решение</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #d32f2f;
+            text-align: center;
+        }
+        .sub {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 70%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background: #b71c1c;
+        }
+        .result {
+            margin-top: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .error-card {
+            border-left: 5px solid #d32f2f;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        .error-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .error-solution {
+            margin-top: 8px;
+            color: #333;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🔍 Банк ошибок</h1>
+<div class="sub">Введите код ошибки или описание — получите решение</div>
+
+<div style="text-align: center;">
+    <input type="text" id="searchInput" placeholder="Пример: Python SyntaxError, Bosch E15, LG F21 ..." size="40">
+    <button onclick="searchError()">Найти</button>
+</div>
+
+<div id="result" class="result">
+    <!-- Здесь появится результат -->
+</div>
+
+<div class="footer">
+    База пополняется. Если не нашли ошибку — напишите нам, и мы добавим.
+</div>
+
+<script>
+    // БАЗА ОШИБОК (пока 3 штуки, вы сможете добавлять новые)
+    const errors = [
+        {
+            keywords: ["python", "syntaxerror", "invalid syntax", "синтаксическая ошибка"],
+            title: "SyntaxError: invalid syntax (Python)",
+            solution: "Проверьте, все ли скобки, кавычки и двоеточия закрыты. Убедитесь, что вы не используете русские буквы в коде. Проверьте отступы."
+        },
+        {
+            keywords: ["bosch", "e15", "посудомойка bosch", "e15 bosch"],
+            title: "Ошибка E15 на посудомоечной машине Bosch",
+            solution: "Сработала защита от протечек. Отключите питание, перекройте воду. Наклоните машину назад, чтобы слить воду из поддона. Вызовите мастера, если ошибка повторяется."
+        },
+        {
+            keywords: ["lg", "стиральная машина lg", "f21", "lg f21"],
+            title: "Ошибка F21 на стиральной машине LG",
+            solution: "Проблема со сливом воды. Очистите сливной фильтр (внизу справа). Проверьте, не забит ли сливной шланг. Если не помогает — вызовите мастера."
+        },
+        {
+            keywords: ["windows 11", "виндовс 11", "Ошибка 0*80070005"],
+            title: "Ошибка 0*80070005 при обновлении Windows 11",
+            solution: "Возникает, когда у пользователя нет прав доступа к файлу или папке. Щелкните правой кнопкой мыши на файле/папке и выберите «Свойства». Перейдите на вкладку «Безопасность». Нажмите «Изменить» и добавьте свою учетную запись с полными правами. Примените изменения. После этого файл должен стать доступным."
+        },
+        {
+            keywords: ["generic", "error", "problem"],
+            title: "Общая ошибка",
+            solution: "Пожалуйста, уточните описание ошибки для более точного поиска."
+        }
+    ];
+
+    function searchError() {
+        let query = document.getElementById("searchInput").value.toLowerCase();
+        let resultDiv = document.getElementById("result");
+        
+        // Ищем совпадения
+        let found = errors.filter(error => {
+            return error.keywords.some(keyword => query.includes(keyword));
+        });
+
+        if (found.length > 0) {
+            let html = "";
+            found.forEach(error => {
+                html += `
+                    <div class="error-card">
+                        <div class="error-title">⚠️ ${error.title}</div>
+                        <div class="error-solution">✅ Решение: ${error.solution}</div>
+                    </div>
+                `;
+            });
+            resultDiv.innerHTML = html;
+        } else {
+            resultDiv.innerHTML = `
+                <div style="text-align: center; color: #777;">
+                    😕 Ничего не найдено. Попробуйте ввести ключевые слова иначе (например, "Bosch E15" или "Python ошибка").<br>
+                    Если вы уверены, что ошибка важна — <a href="#">сообщите нам</a>, мы добавим.
+                </div>
+            `;
+        }
+    }
+
+    // Чтобы можно было искать по нажатию Enter
+    document.getElementById("searchInput").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            searchError();
+        }
+    });
+</script>
+
+</body>
+</html>
