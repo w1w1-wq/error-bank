@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Банк ошибок — найди решение</title>
+    <title>Банк ошибок — сортировка по разделам</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             background: #f5f5f5;
@@ -19,10 +19,42 @@
         .sub {
             text-align: center;
             color: #555;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+        }
+        /* Кнопки категорий */
+        .category-bar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .cat-btn {
+            padding: 10px 24px;
+            font-size: 16px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .cat-btn.active {
+            background: #d32f2f;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .cat-btn:hover:not(.active) {
+            background: #ccc;
+        }
+        /* Поисковая строка */
+        .search-area {
+            text-align: center;
+            margin: 20px 0;
         }
         input {
-            width: 70%;
+            width: 60%;
             padding: 12px;
             font-size: 16px;
             border: 1px solid #ccc;
@@ -41,6 +73,7 @@
         button:hover {
             background: #b71c1c;
         }
+        /* Результаты */
         .result {
             margin-top: 30px;
             background: white;
@@ -48,18 +81,39 @@
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .error-card {
+        .category-group {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .category-group:last-child {
+            border-bottom: none;
+        }
+        .category-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d32f2f;
+            margin-bottom: 15px;
+            padding-left: 8px;
             border-left: 5px solid #d32f2f;
-            padding-left: 15px;
-            margin-bottom: 20px;
+        }
+        .error-card {
+            border-left: 4px solid #ff9800;
+            background: #fef7e0;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: 0.1s;
         }
         .error-title {
             font-weight: bold;
-            font-size: 18px;
+            font-size: 17px;
+            margin-bottom: 6px;
         }
         .error-solution {
-            margin-top: 8px;
             color: #333;
+            font-size: 14px;
+            line-height: 1.4;
         }
         .footer {
             text-align: center;
@@ -67,93 +121,242 @@
             font-size: 12px;
             color: #888;
         }
+        .footer a {
+            color: #d32f2f;
+            text-decoration: none;
+            border-bottom: 1px dashed #d32f2f;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .empty-message {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+        }
+        .empty-message a {
+            color: #d32f2f;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .empty-message a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            input { width: 100%; margin-bottom: 10px; }
+            button { margin-left: 0; width: 100%; }
+            .category-bar { gap: 8px; }
+            .cat-btn { padding: 6px 16px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
 
-<h1>🔍 Банк ошибок</h1>
-<div class="sub">Введите код ошибки или описание — получите решение</div>
+<h1>📚 Банк ошибок</h1>
+<div class="sub">Выберите раздел → введите код или описание → получите решение</div>
 
-<div style="text-align: center;">
-    <input type="text" id="searchInput" placeholder="Пример: Python SyntaxError, Bosch E15, LG F21 ..." size="40">
-    <button onclick="searchError()">Найти</button>
+<!-- Кнопки фильтрации по категориям -->
+<div class="category-bar">
+    <button class="cat-btn active" data-cat="all">📌 Все разделы</button>
+    <button class="cat-btn" data-cat="Программирование">💻 Программирование</button>
+    <button class="cat-btn" data-cat="Электронные приборы">🔌 Электронные приборы</button>
+    <button class="cat-btn" data-cat="Другое">🧩 Другое</button>
+</div>
+
+<div class="search-area">
+    <input type="text" id="searchInput" placeholder="Пример: Python SyntaxError, Bosch E15, LG F21, 0x80070005 ...">
+    <button onclick="searchError()">🔍 Найти</button>
 </div>
 
 <div id="result" class="result">
-    <!-- Здесь появится результат -->
+    <!-- Здесь появятся сгруппированные по разделам результаты -->
 </div>
 
 <div class="footer">
-    База пополняется. Если не нашли ошибку — напишите нам, и мы добавим.
+    База пополняется. Если не нашли ошибку — <a href="https://t.me/zqizzi" target="_blank">напишите нам в Telegram</a>, и мы добавим.
 </div>
 
 <script>
-    // БАЗА ОШИБОК (пока 3 штуки, вы сможете добавлять новые)
+    // ------------------- РАСШИРЕННАЯ БАЗА ОШИБОК С КАТЕГОРИЯМИ -------------------
     const errors = [
+        // ----- ПРОГРАММИРОВАНИЕ -----
         {
+            category: "Программирование",
             keywords: ["python", "syntaxerror", "invalid syntax", "синтаксическая ошибка"],
             title: "SyntaxError: invalid syntax (Python)",
-            solution: "Проверьте, все ли скобки, кавычки и двоеточия закрыты. Убедитесь, что вы не используете русские буквы в коде. Проверьте отступы."
+            solution: "Проверьте все скобки, кавычки и двоеточия. Убедитесь, что вы не используете русские буквы в коде. Проверьте отступы."
         },
         {
+            category: "Программирование",
+            keywords: ["windows 11", "виндовс 11", "0x80070005", "ошибка 0x80070005"],
+            title: "Ошибка 0x80070005 при обновлении Windows 11",
+            solution: "Щелкните правой кнопкой мыши на файле/папке → Свойства → Безопасность → Изменить → добавьте свою учетную запись с полными правами."
+        },
+        {
+            category: "Программирование",
+            keywords: ["javascript", "referenceerror", "is not defined"],
+            title: "ReferenceError: ... is not defined (JavaScript)",
+            solution: "Переменная или функция не объявлена. Убедитесь, что вы определили её перед использованием. Проверьте область видимости (let, const, var)."
+        },
+        {
+            category: "Программирование",
+            keywords: ["java", "nullpointerexception", "null pointer"],
+            title: "NullPointerException (Java)",
+            solution: "Вы пытаетесь обратиться к методу или полю объекта, который равен null. Добавьте проверку if (object != null) перед вызовом."
+        },
+        
+        // ----- ЭЛЕКТРОННЫЕ ПРИБОРЫ (бытовая техника) -----
+        {
+            category: "Электронные приборы",
             keywords: ["bosch", "e15", "посудомойка bosch", "e15 bosch"],
             title: "Ошибка E15 на посудомоечной машине Bosch",
             solution: "Сработала защита от протечек. Отключите питание, перекройте воду. Наклоните машину назад, чтобы слить воду из поддона. Вызовите мастера, если ошибка повторяется."
         },
         {
+            category: "Электронные приборы",
             keywords: ["lg", "стиральная машина lg", "f21", "lg f21"],
             title: "Ошибка F21 на стиральной машине LG",
-            solution: "Проблема со сливом воды. Очистите сливной фильтр (внизу справа). Проверьте, не забит ли сливной шланг. Если не помогает — вызовите мастера."
+            solution: "Проблема со сливом воды. Очистите сливной фильтр (внизу справа). Проверьте сливной шланг и насос. Если не помогает — вызовите мастера."
         },
         {
-            keywords: ["windows 11", "виндовс 11", "Ошибка 0*80070005"],
-            title: "Ошибка 0*80070005 при обновлении Windows 11",
-            solution: "Возникает, когда у пользователя нет прав доступа к файлу или папке. Щелкните правой кнопкой мыши на файле/папке и выберите «Свойства». Перейдите на вкладку «Безопасность». Нажмите «Изменить» и добавьте свою учетную запись с полными правами. Примените изменения. После этого файл должен стать доступным."
+            category: "Электронные приборы",
+            keywords: ["samsung", "стиральная samsung", "5e", "ошибка 5e"],
+            title: "Ошибка 5E на стиральной машине Samsung",
+            solution: "Проблема с подачей воды. Проверьте, открыт ли кран, не пережат ли заливной шланг, чист ли фильтр залива воды."
         },
         {
-            keywords: ["generic", "error", "problem"],
-            title: "Общая ошибка",
-            solution: "Пожалуйста, уточните описание ошибки для более точного поиска."
+            category: "Электронные приборы",
+            keywords: ["indesit", "f05", "indesit f05"],
+            title: "Ошибка F05 на стиральной машине Indesit",
+            solution: "Не сливается вода. Очистите сливной фильтр и проверьте сливной насос. Возможно, засор в шланге."
+        },
+        
+        // ----- ДРУГОЕ (общие, системные, принтеры и пр.) -----
+        {
+            category: "Другое",
+            keywords: ["generic", "error", "problem", "неизвестная ошибка"],
+            title: "Общая / неизвестная ошибка",
+            solution: "Пожалуйста, уточните описание ошибки, код или устройство — это поможет точнее определить решение."
+        },
+        {
+            category: "Другое",
+            keywords: ["принтер", "epson", "ошибка принтера", "замятие бумаги"],
+            title: "Замятие бумаги в принтере Epson / HP / Canon",
+            solution: "Аккуратно извлеките застрявшую бумагу, потянув по направлению движения. Откройте все крышки, проверьте, нет ли обрывков. Перезагрузите принтер."
+        },
+        {
+            category: "Другое",
+            keywords: ["роутер", "wi-fi", "интернет", "нет соединения"],
+            title: "Пропало подключение к Wi-Fi / интернету",
+            solution: "Перезагрузите роутер и устройство. Проверьте, горит ли индикатор интернета. Если нет — свяжитесь с провайдером. Попробуйте забыть сеть и подключиться заново."
         }
     ];
 
+    // Текущая выбранная категория (по умолчанию "all")
+    let currentCategory = "all";
+
+    // Элементы DOM
+    const searchInput = document.getElementById("searchInput");
+    const resultDiv = document.getElementById("result");
+
+    // Навешиваем обработчики на кнопки категорий
+    const catButtons = document.querySelectorAll(".cat-btn");
+    catButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            catButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentCategory = btn.getAttribute("data-cat");
+            searchError();
+        });
+    });
+
+    // Функция поиска с учётом категории и группировкой
     function searchError() {
-        let query = document.getElementById("searchInput").value.toLowerCase();
-        let resultDiv = document.getElementById("result");
+        let query = searchInput.value.toLowerCase().trim();
         
-        // Ищем совпадения
-        let found = errors.filter(error => {
-            return error.keywords.some(keyword => query.includes(keyword));
+        // 1. Фильтрация по категории (если не "all")
+        let filteredByCat = [];
+        if (currentCategory === "all") {
+            filteredByCat = [...errors];
+        } else {
+            filteredByCat = errors.filter(err => err.category === currentCategory);
+        }
+
+        // 2. Фильтрация по поисковому запросу (если есть)
+        let filteredByQuery = [];
+        if (query === "") {
+            filteredByQuery = filteredByCat;
+        } else {
+            filteredByQuery = filteredByCat.filter(error => {
+                return error.keywords.some(keyword => query.includes(keyword));
+            });
+        }
+
+        // 3. Группировка по категориям
+        const grouped = {
+            "Программирование": [],
+            "Электронные приборы": [],
+            "Другое": []
+        };
+        
+        filteredByQuery.forEach(error => {
+            const cat = error.category;
+            if (grouped[cat]) {
+                grouped[cat].push(error);
+            } else {
+                if (!grouped["Другое"]) grouped["Другое"] = [];
+                grouped["Другое"].push(error);
+            }
         });
 
-        if (found.length > 0) {
-            let html = "";
-            found.forEach(error => {
-                html += `
-                    <div class="error-card">
-                        <div class="error-title">⚠️ ${error.title}</div>
-                        <div class="error-solution">✅ Решение: ${error.solution}</div>
-                    </div>
-                `;
-            });
-            resultDiv.innerHTML = html;
-        } else {
-            resultDiv.innerHTML = `
-                <div style="text-align: center; color: #777;">
-                    😕 Ничего не найдено. Попробуйте ввести ключевые слова иначе (например, "Bosch E15" или "Python ошибка").<br>
-                    Если вы уверены, что ошибка важна — <a href="#">сообщите нам</a>, мы добавим.
-                </div>
-            `;
+        // 4. Формируем HTML
+        let html = "";
+        const order = ["Программирование", "Электронные приборы", "Другое"];
+        let hasAnyError = false;
+
+        for (let cat of order) {
+            const errorsInCat = grouped[cat];
+            if (errorsInCat && errorsInCat.length > 0) {
+                hasAnyError = true;
+                html += `<div class="category-group">
+                            <div class="category-title">📁 ${cat}</div>`;
+                errorsInCat.forEach(error => {
+                    html += `
+                        <div class="error-card">
+                            <div class="error-title">⚠️ ${error.title}</div>
+                            <div class="error-solution">✅ Решение: ${error.solution}</div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
         }
+
+        if (!hasAnyError) {
+            let categoryHint = "";
+            if (currentCategory !== "all") {
+                categoryHint = ` в разделе «${currentCategory}»`;
+            }
+            html = `<div class="empty-message">
+                        😕 Ничего не найдено${categoryHint} по запросу «${query || "пустой запрос"}».<br>
+                        Попробуйте ввести ключевые слова иначе (например, «Bosch E15», «Python ошибка», «LG F21»).<br>
+                        Если вы уверены, что ошибка важна — <a href="https://t.me/zqizzi" target="_blank">сообщите нам в Telegram</a>, мы добавим.
+                    </div>`;
+        }
+
+        resultDiv.innerHTML = html;
     }
 
-    // Чтобы можно было искать по нажатию Enter
-    document.getElementById("searchInput").addEventListener("keypress", function(event) {
+    // Поиск по нажатию Enter
+    searchInput.addEventListener("keypress", function(event) {
         if (event.key === "Enter") {
             searchError();
         }
     });
-</script>
 
+    // При загрузке страницы показываем все ошибки
+    searchError();
+</script>
 </body>
 </html>
+```
